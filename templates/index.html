@@ -8,11 +8,11 @@
 </head>
 <body>
     <!-- Show error or success messages if there are any -->
-    {% with messages = get_flashed_messages() %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
         <!-- Check to see if there are any messages to show -->
         {% if messages %}
-            {% for message in messages %}
-                <p class="message">{{ message }}</p>
+            {% for category, message in messages %}
+                <p class="alert {{ category }}">{{ message }}</p>
             {% endfor %}
         {% endif %}
     {% endwith %}
@@ -35,6 +35,7 @@
     <!-- Code for listing owned items -->
     <h2>List of Owned Items</h2>
     <ul>
+        <!-- This is some python jinja2 code. Only existing items will be displayed. -->
         {% for item in items %}
             <li>Name: {{ item[0] }} - Quantity: {{ item[1] }}</li>
         {% endfor %}

@@ -27,13 +27,13 @@ def get_db_connection():
 def get_all_items():
     # Create a new database connection for each request
     conn = get_db_connection()  # Create a new database connection
-    cursor = conn.cursor() # Creates a cursor for the connection
+    cursor = conn.cursor() # Creates a cursor for the connection, you need this to do queries
     # Query the db
     query = "SELECT name, quantity FROM items"
     cursor.execute(query)
     # Get result and close
     result = cursor.fetchall() # Gets result from query
-    conn.close() # Closes db connection (You should do this after each query, otherwise your database may become locked.)
+    conn.close() # Close the db connection (NOTE: You should do this after each query, otherwise your database may become locked)
     return result
 # ------------------------ END FUNCTIONS ------------------------ #
 
@@ -43,31 +43,38 @@ def get_all_items():
 @app.route("/")
 def home():
     items = get_all_items() # Call defined function to get all items
-    # Return the page to be rendered
-    return render_template("index.html", items=items)
+    return render_template("index.html", items=items) # Return the page to be rendered
 
 # EXAMPLE OF POST REQUEST
 @app.route("/new-item", methods=["POST"])
 def add_item():
-    data = request.form
-    item_name = data["name"]
-    item_quantity = data["quantity"]
+    try:
+        # Get items from the form
+        data = request.form
+        item_name = data["name"] # This is defined in the input element of the HTML form on index.html
+        item_quantity = data["quantity"] # This is defined in the input element of the HTML form on index.html
 
-    # Create a new database connection for each request
-    conn = get_db_connection()  # Create a new database connection
-    cursor = conn.cursor() # Creates a cursor for the connection
-    # Prepare the query statemenet
-    query = "INSERT INTO items (name, quantity) VALUES (%s, %s)"
-    values = (item_name,item_quantity,)
-    # Execute and commit changes to the db
-    cursor.execute(query, values)
-    conn.commit() # Commit saves the changes to the db. If you don't include this, then changes will not save.
-    conn.close() # Closes db connection (You should do this after each query, otherwise your database may become locked.)
-    
-    # Send message to page
-    flash("Item added successfully")
-    # Redirect to home
-    return redirect(url_for("home"))
+        # Create a new database connection for each request
+        conn = get_db_connection() # Create a new database connection
+        cursor = conn.cursor() # Creates a cursor for the connection, you need this to do queries
+        # Prepare the query statemenet
+        query = "INSERT INTO items (name, quantity) VALUES (%s, %s)"
+        values = (item_name,item_quantity,)
+        # Execute and commit changes to the db
+        cursor.execute(query, values)
+        conn.commit() # Commit saves the changes to the db. If you don't include this, then changes will not save
+        # Close the db connection (NOTE: You should do this after each query, otherwise your database may become locked)
+        conn.close()
+        
+        # Send message to page. There is code in index.html that checks for these messages
+        flash("Item added successfully", "success")
+        # Redirect to home. This works because the home route is named home in this file
+        return redirect(url_for("home"))
+
+    # If an error occurs, this code block will be called
+    except Exception as e:
+        flash(f"An error occurred: {str(e)}", "error") # Send the error message to the web page
+        return redirect(url_for("home")) # Redirect to home
 # ------------------------ END ROUTES ------------------------ #
 
 
