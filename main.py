@@ -40,7 +40,7 @@ def get_all_items():
 
 # ------------------------ BEGIN ROUTES ------------------------ #
 # EXAMPLE OF GET REQUEST
-@app.route("/")
+@app.route("/", methods=["GET"])
 def home():
     items = get_all_items() # Call defined function to get all items
     return render_template("index.html", items=items) # Return the page to be rendered
@@ -54,17 +54,7 @@ def add_item():
         item_name = data["name"] # This is defined in the input element of the HTML form on index.html
         item_quantity = data["quantity"] # This is defined in the input element of the HTML form on index.html
 
-        # Create a new database connection for each request
-        conn = get_db_connection() # Create a new database connection
-        cursor = conn.cursor() # Creates a cursor for the connection, you need this to do queries
-        # Prepare the query statemenet
-        query = "INSERT INTO items (name, quantity) VALUES (%s, %s)"
-        values = (item_name,item_quantity,)
-        # Execute and commit changes to the db
-        cursor.execute(query, values)
-        conn.commit() # Commit saves the changes to the db. If you don't include this, then changes will not save
-        # Close the db connection (NOTE: You should do this after each query, otherwise your database may become locked)
-        conn.close()
+        # TODO: Insert this data into the database
         
         # Send message to page. There is code in index.html that checks for these messages
         flash("Item added successfully", "success")
